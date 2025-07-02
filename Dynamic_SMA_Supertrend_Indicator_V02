@@ -1,6 +1,6 @@
 //@version=6
 //Author Ravindra Elicherla https://x.com/Ravindra_PE
-indicator("Dynamic SMA Supertrend Indicator", overlay=true)
+indicator("Dynamic SMA Supertrend Indicator v2", overlay=true)
 
 // Input parameters
 st_length = input.int(14, "Supertrend ATR Length", minval=1)
