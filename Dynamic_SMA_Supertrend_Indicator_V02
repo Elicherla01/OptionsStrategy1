@@ -5,7 +5,7 @@ indicator("Dynamic SMA Supertrend Indicator", overlay=true)
 // Input parameters
 st_length = input.int(14, "Supertrend ATR Length", minval=1)
 st_multiplier = input.float(4.0, "Supertrend Multiplier", minval=0.1, step=0.1)
-exit_percentage = input.float(1.0, "SMA Exit Percentage", minval=0.1, maxval=10.0, step=0.1)
+entry_percentage = input.float(1.0, "SMA entry_percentage Percentage", minval=0.1, maxval=10.0, step=0.1)
 
 // Calculate dynamic SMA period based on timeframe
 trading_minutes = 375
@@ -22,12 +22,12 @@ sma_line = ta.sma(close, sma_period)
 [supertrend, direction] = ta.supertrend(st_multiplier, st_length)
 
 // Calculate exit levels (used in exit logic)
-sma_exit_long = sma_line * (1 - exit_percentage / 100)   // X% below SMA for long exit
-sma_exit_short = sma_line * (1 + exit_percentage / 100)  // X% above SMA for short exit
+sma_entry_long = sma_line    // SMA line for long entry
+sma_entry_short = sma_line   // SMA line for short entry
 
 // Signal conditions
-buy_condition = close > supertrend and close > sma_line
-sell_condition = close < supertrend and close < sma_line
+buy_condition = close > supertrend and close > sma_entry_long
+sell_condition = close < supertrend and close < sma_entry_short
 
 // Exit conditions
 long_exit_condition = close < supertrend    // Exit bull put spread when price goes below Supertrend
@@ -57,12 +57,12 @@ plot(sma_line, color=color.blue, linewidth=2, title="Dynamic SMA")
 plot(supertrend, color=direction < 0 ? color.green : color.red, linewidth=2, title="Supertrend")
 
 // Plot buy/sell signals with larger size and better visibility
-plotshape(buy_signal, style=shape.triangleup, location=location.belowbar, color=color.new(color.green, 0), text="Bull Put Spread", textcolor=color.white, size=size.normal)
-plotshape(sell_signal, style=shape.triangledown, location=location.abovebar, color=color.new(color.red, 0), text="Bear Call Spread", textcolor=color.white, size=size.normal)
+plotshape(buy_signal, style=shape.triangleup, location=location.belowbar, color=color.new(color.green, 0), text="Bull Put Spread", textcolor=color.rgb(67, 230, 108), size=size.normal)
+plotshape(sell_signal, style=shape.triangledown, location=location.abovebar, color=color.new(color.red, 0), text="Bear Call Spread", textcolor=color.rgb(219, 82, 82), size=size.normal)
 
 // Plot exit signals with better visibility
-plotshape(long_exit_signal, style=shape.xcross, location=location.belowbar, color=color.new(color.red, 0), text="EXIT Bull PS", textcolor=color.white, size=size.small)
-plotshape(short_exit_signal, style=shape.xcross, location=location.abovebar, color=color.new(color.red, 0), text="EXIT Bear CS", textcolor=color.white, size=size.small)
+plotshape(long_exit_signal, style=shape.xcross, location=location.belowbar, color=color.new(color.red, 0), text="EXIT Bull PS", textcolor=color.rgb(221, 225, 24), size=size.small)
+plotshape(short_exit_signal, style=shape.xcross, location=location.abovebar, color=color.new(color.red, 0), text="EXIT Bear CS", textcolor=color.rgb(221, 225, 24), size=size.small)
 
 // Alternative: Plot as background colors for better visibility
 bgcolor(buy_signal ? color.new(color.green, 90) : na, title="Buy Signal Background")
@@ -78,8 +78,7 @@ if barstate.islast
     table.cell(info_table, 1, 1, str.tostring(sma_period), text_color=color.black)
     table.cell(info_table, 0, 2, "Supertrend", text_color=color.black, bgcolor=color.gray)
     table.cell(info_table, 1, 2, str.tostring(st_length) + "," + str.tostring(st_multiplier), text_color=color.black)
-    table.cell(info_table, 0, 3, "Exit %", text_color=color.black, bgcolor=color.gray)
-    table.cell(info_table, 1, 3, str.tostring(exit_percentage) + "%", text_color=color.black)
+
     table.cell(info_table, 0, 4, "Position", text_color=color.black, bgcolor=color.gray)
-    table.cell(info_table, 1, 4, position_state == 1 ? "LONG" : position_state == -1 ? "SHORT" : "FLAT", 
+    table.cell(info_table, 1, 4, position_state == 1 ? "Bull Put" : position_state == -1 ? "Bear Call" : "FLAT", 
               text_color=position_state == 1 ? color.green : position_state == -1 ? color.red : color.black)
