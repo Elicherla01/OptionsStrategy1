@@ -1,0 +1,188 @@
+# Dynamic SMA Supertrend Indicator v2
+
+**Author:** Ravindra Elicherla  
+**Version:** 6  
+**Type:** Overlay Indicator  
+**Platform:** TradingView Pine Script
+
+## Overview
+
+The Dynamic SMA Supertrend Indicator v2 is a sophisticated trading indicator that combines a dynamically calculated Simple Moving Average (SMA) with the Supertrend indicator to generate options trading signals. The indicator is specifically designed for bull put spreads and bear call spreads, providing clear entry and exit signals with visual confirmation.
+
+## Key Features
+
+- **Dynamic SMA Calculation**: Automatically adjusts SMA period based on the current timeframe
+- **Supertrend Integration**: Uses ATR-based Supertrend for trend confirmation
+- **Options Trading Signals**: Generates specific signals for bull put and bear call spreads
+- **State Management**: Tracks position states to prevent signal overlap
+- **Visual Indicators**: Multiple visual elements including shapes, background colors, and information table
+- **Customizable Parameters**: Adjustable settings for different trading strategies
+
+## Input Parameters
+
+### Supertrend Settings
+- **Supertrend ATR Length** (`st_length`): Default 14
+  - Controls the period for ATR calculation
+  - Higher values create smoother trend signals
+  - Range: 1 to unlimited
+
+- **Supertrend Multiplier** (`st_multiplier`): Default 4.0
+  - Determines the distance of Supertrend lines from price
+  - Higher values reduce sensitivity and false signals
+  - Range: 0.1 to unlimited, step 0.1
+
+### SMA Settings
+- **SMA Entry Percentage** (`entry_percentage`): Default 1.0%
+  - Currently defined but not actively used in calculations
+  - Reserved for future enhancements
+  - Range: 0.1% to 10.0%, step 0.1%
+
+## Core Logic
+
+### Dynamic SMA Calculation
+```pinescript
+trading_minutes = 375  // Standard trading day minutes
+timeframe_minutes = timeframe.multiplier
+sma_period = math.round(trading_minutes / timeframe_minutes)
+sma_period := math.max(sma_period, 2)  // Minimum period of 2
+```
+
+The SMA period automatically adjusts based on timeframe:
+- 1-minute chart: ~375 period SMA
+- 5-minute chart: ~75 period SMA  
+- 15-minute chart: ~25 period SMA
+- 1-hour chart: ~6 period SMA (minimum 2)
+
+### Signal Generation
+
+#### Entry Signals
+- **Bull Put Spread Signal**: `close > supertrend AND close > sma_line`
+- **Bear Call Spread Signal**: `close < supertrend AND close < sma_line`
+
+#### Exit Signals
+- **Bull Put Spread Exit**: `close < supertrend`
+- **Bear Call Spread Exit**: `close > supertrend`
+
+### Position State Management
+The indicator maintains three states:
+- `0`: No position (FLAT)
+- `1`: Bull Put Spread active
+- `-1`: Bear Call Spread active
+
+## Visual Elements
+
+### Chart Overlays
+- **Blue Line**: Dynamic SMA
+- **Green/Red Line**: Supertrend (Green = Bullish, Red = Bearish)
+- **Green Triangle Up**: Bull Put Spread entry signal
+- **Red Triangle Down**: Bear Call Spread entry signal
+- **Red X**: Exit signals for both positions
+
+### Background Colors
+- **Light Green**: Bull Put Spread entry
+- **Light Red**: Bear Call Spread entry
+- **Light Orange**: Exit signals
+
+### Information Table
+Located at top-right corner showing:
+- Current timeframe
+- Calculated SMA period
+- Supertrend parameters
+- Current position status
+
+## Usage Instructions
+
+### Setup
+1. Add the indicator to your TradingView chart
+2. Adjust parameters based on your trading style:
+   - Conservative: Higher Supertrend multiplier (5.0+)
+   - Aggressive: Lower Supertrend multiplier (2.0-3.0)
+3. Choose appropriate timeframe for your strategy
+
+### Trading Workflow
+
+#### For Bull Put Spreads
+1. Wait for green triangle with "Bull Put Spread" text
+2. Confirm price is above both Supertrend and SMA
+3. Enter bull put spread position
+4. Exit when red X appears below price with "EXIT Bull PS" text
+
+#### For Bear Call Spreads
+1. Wait for red triangle with "Bear Call Spread" text
+2. Confirm price is below both Supertrend and SMA
+3. Enter bear call spread position
+4. Exit when red X appears above price with "EXIT Bear CS" text
+
+## Best Practices
+
+### Timeframe Selection
+- **Short-term trading**: 1-5 minute charts
+- **Swing trading**: 15-60 minute charts
+- **Position trading**: Daily charts
+
+### Parameter Optimization
+- **Trending markets**: Lower Supertrend multiplier (2.0-3.0)
+- **Ranging markets**: Higher Supertrend multiplier (4.0-6.0)
+- **Volatile markets**: Increase ATR length (20-30)
+
+### Risk Management
+- Always use stop losses beyond the exit signals
+- Consider volatility when sizing positions
+- Validate signals with additional confirmation indicators
+- Monitor options Greeks and time decay
+
+## Technical Specifications
+
+### Dependencies
+- Pine Script version 6
+- Built-in TradingView functions: `ta.sma()`, `ta.supertrend()`
+- No external libraries required
+
+### Performance Considerations
+- Dynamic SMA calculation updates on every bar
+- State management prevents signal overlap
+- Efficient plotting with conditional rendering
+
+### Compatibility
+- Works on all TradingView chart types
+- Compatible with all timeframes
+- Suitable for all markets (stocks, forex, crypto, futures)
+
+## Limitations
+
+1. **Lagging Nature**: SMA and Supertrend are lagging indicators
+2. **False Signals**: May generate false signals in choppy markets
+3. **Options-Specific**: Designed specifically for spread strategies
+4. **No Volume Analysis**: Doesn't incorporate volume confirmation
+
+## Troubleshooting
+
+### Common Issues
+- **No signals appearing**: Check if price is moving significantly relative to indicators
+- **Too many signals**: Increase Supertrend multiplier
+- **Delayed signals**: Reduce SMA period by using higher timeframes
+
+### Optimization Tips
+- Backtest on historical data before live trading
+- Combine with other indicators for confirmation
+- Adjust parameters based on market conditions
+- Consider market session timing for better results
+
+## Version History
+
+**v2 Current Features:**
+- Dynamic SMA calculation
+- Improved signal visualization
+- State management system
+- Information table display
+- Background color coding
+
+## Support and Resources
+
+For questions or updates, contact the author:
+- **Twitter**: @Ravindra_PE
+- **Platform**: TradingView
+
+## Disclaimer
+
+This indicator is for educational and informational purposes only. Trading involves substantial risk of loss and is not suitable for all investors. Past performance does not guarantee future results. Always conduct your own analysis and consider consulting with a financial advisor before making investment decisions.
